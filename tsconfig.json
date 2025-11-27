@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+      "target": "es6",
+      "lib": ["es6", "dom"],
+      "module": "commonjs",
+      "moduleResolution": "node",
+      "esModuleInterop": true,
+      "sourceMap": true,
+      "types": ["cypress"],
+      "preserveValueImports": false,
+      "skipLibCheck": true,
+      "strict": true
+    },
+    "include": [
+      "cypress/**/*.ts",
+      "cypress/**/*.d.ts",
+      "cypress.d.ts"
+    ],
+    "exclude": [
+      "cypress.config.ts",
+      "node_modules",
+      "node_modules/cypress/types/mocha/index.d.ts"
+    ]
+  }
+  
