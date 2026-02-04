@@ -95,12 +95,28 @@ it.only("Add a new cleaning -  Compliant cycle", function () {
       const randomIndex = Math.floor(Math.random() * $options.length);
       const randomOption = $options[randomIndex];
       const randomTextCleaningType = randomOption.innerText.trim();
+      cy.wrap(randomTextCleaningType).as("selectedCleaningType");
       cy.wrap(randomOption).click({ force: true });
       cy.wrap(randomTextCleaningType).as("selectedCleaningType");
       cy.get("@selectedCleaningType").then((cleaningType) => {
         cy.get(CLEANING.COMPLETED_CLEANING_TYPE_FIELD).should("be.visible").and("contain", cleaningType);
-      });
+        cy.get<string>("@selectedCleaningType").then((cleaningType) => {
+          if (cleaningType === "Acțiune corectivă") {
+            cy.get('input[placeholder="Selectează pas/acțiune"]', { timeout: 10000 }).should("be.visible").click({ force: true });
 
+            cy.get('[role="option"]')
+              .should("have.length.greaterThan", 0)
+              .then(($options) => {
+                const randomIndex = Math.floor(Math.random() * $options.length);
+                const randomOption = $options[randomIndex];
+                const randomText = randomOption.innerText.trim();
+
+                cy.wrap(randomOption).click({ force: true });
+                cy.wrap(randomText).as("selectedCorrectiveAction");
+              });
+          }
+        });
+      });
       cy.get(CLEANING.SUBSTANCE_FIELD, { timeout: 50000 }).should("be.visible").click({ force: true });
       cy.get(CLEANING.SELECTED_SUBSTANCE)
         .should("be.visible")
@@ -127,8 +143,8 @@ it.only("Add a new cleaning -  Compliant cycle", function () {
         cy.contains("p", cleaningType, { timeout: 10000 }).should("be.visible");
       });
 
-      cy.get('[type="checkbox"]').each((_, index) => {
-        cy.get('[type="checkbox"]')
+      cy.get(CLEANING.CHECKBOX).each((_, index) => {
+        cy.get(CLEANING.CHECKBOX)
           .eq(index)
           .then(($cb) => {
             if ($cb.attr("aria-checked") !== "true") {
@@ -138,5 +154,15 @@ it.only("Add a new cleaning -  Compliant cycle", function () {
       });
       cy.sign();
       cy.contains(CLEANING.SPAN, this.sterilization.succesMessage).should("be.visible");
+      cy.verifySignName(this.users.name);
+
+      cy.contains(CLEANING.BUTTON, this.cleaning.continueButton).should("be.visible").click({ force: true });
+      cy.get<string>("@selectedWard").then((wardName) => {
+        cy.contains("h6", wardName, { timeout: 10000 }).should("be.visible");
+      });
+
+      cy.get<string>("@selectedCleaningType").then((cleaningType) => {
+        cy.contains("p", cleaningType, { timeout: 10000 }).should("be.visible");
+      });
     });
 });

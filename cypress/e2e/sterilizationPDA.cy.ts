@@ -633,7 +633,6 @@ it("Create a sterilization cycle -  Non-compliant cycle", function () {
                   cy.contains("span", assetName).should("be.visible");
                 });
               });
-
               cy.get(STERILIZATION.SPAN, { timeout: 10000 }).should("be.visible").and("contain.text", "Neconform");
             });
           });

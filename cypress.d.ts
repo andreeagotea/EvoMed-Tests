@@ -5,6 +5,7 @@ declare namespace Cypress {
     sign(): Chainable<void>;
     signCycle(): Chainable<void>;
     verifySignName(name: string): Chainable<void>;
+    handleCorrectiveAction(): Chainable<void>;
   }
 }
 export {};
@@ -18,11 +19,6 @@ declare namespace Cypress {
 declare namespace Cypress {
   interface Chainable {
     dataCy(value: string): Chainable<JQuery<HTMLElement>>;
-    createNewTransaction(
-      amount: string,
-      note: string,
-      input: string,
-      endpointNewTransaction: string
-    ): Chainable<void>;
+    createNewTransaction(amount: string, note: string, input: string, endpointNewTransaction: string): Chainable<void>;
   }
 }

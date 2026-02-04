@@ -1,10 +1,14 @@
 {
     "searchNIDButton": "Caută",
-    "patientNID": "201798000",
+    "patientNIDnotHospitalized": "201798000",
+    "patientNIDhospitalized": "201799000",
     "enterNIDPlaceholder": "Introdu NID",
     "scanNIDText": "Scanează cod de bare / NID pacient sau",
     "patientNotHospitalizedText": "Pacientul nu este internat. Activități pot fi adăugate doar pacienților internați",
     "endpointPatientsPage": "/activities/patients?category=patient_medical_procedure",
-    "endpointDashboardPage": "/dashboard"
+    "endpointDashboardPage": "/dashboard",
+    "medicalToolSterile": "5201000",
+    "medicalToolNotSterile": "5201000",
+    "searchButton": "Caută"
   }
   

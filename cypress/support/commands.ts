@@ -1,5 +1,4 @@
-
-// ******Cypress.Commands.add('loginViaUI', (email: string, password: string) => 
+// ******Cypress.Commands.add('loginViaUI', (email: string, password: string) =>
 // *****************************************
 // This example commands.js shows you how to
 // create various custom commands and overwrite
@@ -25,47 +24,83 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-import {LOGIN} from "../support/testids/login"
-import { PATIENTS } from "../support/testids/patients"
-import { STERILIZATION } from "../support/testids/sterilization"
-import { USERS } from "./testids/users"
+import { LOGIN } from "../support/testids/login";
+import { PATIENTS } from "../support/testids/patients";
+import { STERILIZATION } from "../support/testids/sterilization";
+import { USERS } from "./testids/users";
+import { CLEANING } from "./testids/cleaning";
 // import { HOMEPAGE } from "../support/testids/homepage"
 // import { TRANSACTION } from "../support/testids/transaction"
 
-Cypress.Commands.add('sign', function() {
-cy.fixture('usersPage').as('users')
-cy.fixture('sterilizationPage').as('sterilization')
-cy.contains(USERS.BUTTON, this.users.signButton).should('be.visible').click({force: true})
-cy.contains(USERS.P, this.users.signModalMessage).should('be.visible')
-cy.contains(USERS.BUTTON, this.users.searchButton).should('be.disabled')
-cy.get(USERS.ENTER_NID_INPUT).should('be.visible').type(this.users.barcode).type('{enter}')
-cy.get(USERS.USER_PIN_FIELD).should('be.visible').type(this.users.pin).type('{enter}')
-cy.get(STERILIZATION.SUCCESS_MESSAGE_MODAL).should('be.visible').and('contain.text', this.sterilization.succesMessage)
-})
-
-Cypress.Commands.add('signCycle', function() {
-    cy.fixture('usersPage').as('users')
-    cy.fixture('sterilizationPage').as('sterilization')
-    cy.contains(USERS.P, this.users.signModalMessage).should('be.visible')
-    cy.contains(STERILIZATION.BUTTON, 'Caută').should('be.disabled')
-    cy.get(USERS.ENTER_NID_INPUT).should('be.visible').type(this.users.barcode).type('{enter}')
-    cy.get(USERS.USER_PIN_FIELD).should('be.visible').type(this.users.pin).type('{enter}')
-});
-
-Cypress.Commands.add('verifySignName', function(name) {
-    cy.get(STERILIZATION.DIV)
-  .invoke("text")
-  .then((fullText) => {
-    let nameFromText = "";
-    if (fullText && fullText.includes("efectuată de")) {
-      const after = fullText.split("efectuată de ")[1] || "";
-      nameFromText = (after.split(",")[0] || "").trim();
-    } else {
-      const m = fullText.match(/efectuat[ăa] de\s+(.*?),/i);
-      nameFromText = m ? m[1].trim() : "";
-    }
-    cy.get("@displayedName").then((displayedName) => {
-      expect(nameFromText).to.equal(displayedName);
+Cypress.Commands.add("sign", function () {
+  cy.fixture("usersPage").then((users) => {
+    cy.fixture("sterilizationPage").then((sterilization) => {
+      cy.contains(STERILIZATION.BUTTON, users.signButton).should("be.visible").click({ force: true });
+      cy.get(USERS.SIGN_MODAL_TITLE).should('be.visible').and('contain.text', this.users.signButton);
+      cy.get(USERS.SIGNATURE_MODAL).find(USERS.SIGN_MODAL_BARCODE_INPUT).should('be.visible').click({ force: true }).type(users.barcode, { delay: 50, force: true }).type("{enter}");
+      cy.get(USERS.SIGNATURE_MODAL).find(USERS.USER_PIN_FIELD).should("be.visible").type(users.pin, { force: true }).type("{enter}");
+      cy.get(STERILIZATION.SUCCESS_MESSAGE_MODAL).should("be.visible").and("contain.text", sterilization.succesMessage);
     });
   });
 });
+
+Cypress.Commands.add("signCycle", function () {
+  cy.fixture("usersPage").as("users");
+  cy.fixture("sterilizationPage").as("sterilization");
+  cy.contains(USERS.P, this.users.signModalMessage).should("be.visible");
+  cy.contains(STERILIZATION.BUTTON, "Caută").should("be.disabled");
+  cy.get(USERS.ENTER_NID_INPUT).should("be.visible").type(this.users.barcode).type("{enter}");
+  cy.get(USERS.USER_PIN_FIELD).should("be.visible").type(this.users.pin).type("{enter}");
+});
+
+Cypress.Commands.add("verifySignName", function (name) {
+  cy.contains(STERILIZATION.DIV, "efectuat", { timeout: 10000 })
+    .invoke("text")
+    .then((fullText) => {
+      const normalized = fullText.replace(/\s+/g, " ").trim();
+
+      const match = normalized.match(/efectuat[ăa] de\s+([^,]+)/i);
+      expect(match, `Text invalid: ${normalized}`).to.not.be.null;
+
+      const nameFromText = match[1].trim();
+
+      cy.get<string>("@displayedName").then((displayedName) => {
+        expect(nameFromText).to.equal(displayedName);
+      });
+    });
+});
+
+function handleCorrectiveAction() {
+  cy.get(CLEANING.CORRECTIVE_ACTION_FIELD, { timeout: 10000 }).should("be.visible").click({ force: true });
+
+  cy.get(CLEANING.CORRECTIVE_ACTION_OPTIONS)
+    .should("have.length.greaterThan", 0)
+    .then(($options) => {
+      const randomIndex = Math.floor(Math.random() * $options.length);
+      const randomOption = $options[randomIndex];
+      const randomText = randomOption.innerText.trim();
+
+      cy.wrap(randomOption).click({ force: true });
+      cy.wrap(randomText).as("selectedCorrectiveAction");
+
+      cy.get("@selectedCorrectiveAction").then((action) => {
+        cy.contains(action, { timeout: 10000 }).should("be.visible");
+      });
+    });
+
+  Cypress.Commands.add("checkAllActivities", () => {
+    cy.get("body").then(($body) => {
+      const checkboxes = $body.find('[type="checkbox"]');
+
+      if (checkboxes.length === 0) {
+        throw new Error("Nu există activități (checkbox-uri) pentru acest tip de curățenie");
+      }
+
+      cy.wrap(checkboxes).each(($cb) => {
+        if ($cb.attr("aria-checked") !== "true") {
+          cy.wrap($cb).click({ force: true });
+        }
+      });
+    });
+  });
+}
