@@ -98,7 +98,7 @@ it('Access Patients section from PDA - The patient is hospitalized - add activit
 })
 
 
-it.only('Access Patients section from PDA - The patient is hospitalized - add medical tool', function () {
+it('Access Patients section from PDA - The patient is hospitalized - add medical tool', function () {
   cy.url().should('include', this.patient.endpointDashboardPage);
   cy.get(DASHBOARD.PATIENTS_AVATAR_IMAGE).should('be.visible').click();
   cy.get(PATIENTS.ENTER_NID_INPUT).should('be.visible').clear().type(this.patient.patientNIDhospitalized);
@@ -114,7 +114,7 @@ it.only('Access Patients section from PDA - The patient is hospitalized - add me
     const signBtn = $body.find(`button:contains("${this.users.signButton}")`);
     const btnActive = signBtn.length > 0 && !signBtn.prop('disabled');
     expect(errorVisible || btnActive, "Așteptare validare instrument (eroare sau buton activ)").to.be.true;
-    
+
   }).then(() => {
     cy.get('body').then(($body) => {
       if ($body.text().includes('Ustensila nu este sterilă')) {
