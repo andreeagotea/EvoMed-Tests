@@ -9,7 +9,7 @@ beforeEach(function () {
   cy.fixture("usersPage").as("users");
   cy.fixture("cleaningPage").as("cleaning");
   cy.fixture("sterilizationPage").as("sterilization");
-  cy.visit("https://qaintegrat-iocn.dev.evozon.com/");
+  cy.visit("https://qaone-iocn.dev.evozon.com/");
   cy.viewport(350, 650);
 
   const username = Cypress.env("username");
@@ -35,7 +35,7 @@ it("Access Cleaning section from PDA", function () {
   cy.url().should("include", this.cleaning.endpointCleaningPage);
 });
 
-it.only("Add a new cleaning -  Compliant cycle", function () {
+it("Add a new cleaning -  Compliant cycle", function () {
   cy.url().should("include", this.patient.endpointDashboardPage);
   cy.get(DASHBOARD.TRANSLATE_ICON).should("be.visible");
   cy.get(DASHBOARD.ACCOUNT_ICON).should("be.visible");

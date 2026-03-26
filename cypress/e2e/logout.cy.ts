@@ -7,7 +7,7 @@ beforeEach(() => {
   cy.fixture('patientPage').as('patient');
   cy.fixture('loginPage').as('login');
   cy.fixture('accountCardDetailsPage').as('accountCardDetails');
-  cy.visit('https://qaintegrat-iocn.dev.evozon.com/')
+  cy.visit('https://qaone-iocn.dev.evozon.com/')
   cy.get(LOGIN.USER_NAME_LOGIN).should('be.visible').type(Cypress.env('username'))
   cy.get(LOGIN.PASSWORD_LOGIN).should('be.visible').type(Cypress.env('password'))
   cy.get(LOGIN.LOGIN_BUTTON).should('be.visible').click()

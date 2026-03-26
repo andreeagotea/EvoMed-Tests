@@ -4,6 +4,7 @@ declare namespace Cypress {
     loginViaUI(email: string, password: string): Chainable<void>;
     sign(): Chainable<void>;
     signCycle(): Chainable<void>;
+    selectselectWardHospitalization(): Chainable<void>;
     verifySignName(name: string): Chainable<void>;
     handleCorrectiveAction(): Chainable<void>;
   }

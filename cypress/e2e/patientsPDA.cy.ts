@@ -9,7 +9,7 @@ beforeEach(() => {
   cy.fixture('patientPage').as('patient');
   cy.fixture('sterilizationPage').as('sterilization');
   cy.fixture('usersPage').as('users');
-  cy.visit('https://qaintegrat-iocn.dev.evozon.com/')
+  cy.visit('https://qaone-iocn.dev.evozon.com/')
   cy.viewport(350, 650)
   cy.get(LOGIN.USER_NAME_LOGIN).should('be.visible').type(Cypress.env('username'))
   cy.get(LOGIN.PASSWORD_LOGIN).should('be.visible').type(Cypress.env('password'))
@@ -30,6 +30,23 @@ it('Access Patiens section from PDA - The patient is not hospitalized.', functio
   cy.get(PATIENTS.ENTER_NID_INPUT).type(this.patient.patientNIDnotHospitalized)
   cy.get(PATIENTS.SEARCH_NID_BUTTON).should('be.visible').and('have.text',this.patient.searchNIDButton).click()
   cy.contains(PATIENTS.SPAN, this.patient.patientNotHospitalizedText).should('be.visible')
+})
+
+it('Access Patiens section from PDA - Invalid NID', function() {
+  cy.url().should('include', this.patient.endpointDashboardPage);
+  cy.get(DASHBOARD.TRANSLATE_ICON).should('be.visible')
+  cy.get(DASHBOARD.ACCOUNT_ICON).should('be.visible')
+  cy.get(DASHBOARD.PATIENTS_AVATAR_IMAGE).should('be.visible').click()
+  cy.get(PATIENTS.SCANNER_ICON).should('be.visible')
+  cy.contains(PATIENTS.p, this.patient.scanNIDText).should('be.visible')
+  cy.url().should('include', this.patient.endpointPatientsPage);
+  cy.get(PATIENTS.SEARCH_NID_BUTTON).should('be.visible').should('be.disabled').and('have.text',this.patient.searchNIDButton)
+  cy.get(PATIENTS.ENTER_NID_INPUT).should('be.visible').should('have.attr', 'placeholder', this.patient.enterNIDPlaceholder).click()
+  cy.get(PATIENTS.ENTER_NID_INPUT).clear()
+  const invalidNID = this.patient.patientNIDInvalid;
+  cy.get(PATIENTS.ENTER_NID_INPUT).type(invalidNID)
+  cy.get(PATIENTS.SEARCH_NID_BUTTON).should('be.visible').and('have.text',this.patient.searchNIDButton).click()
+  cy.contains(PATIENTS.SPAN, `${this.patient.scanBarcodeText} '${invalidNID}' ${this.patient.scanBarcodeInvalidText}`, { timeout: 10000 }).should('be.visible');
 })
 
 it('Access Patients section from PDA - The patient is hospitalized - add activity', function () {
@@ -106,7 +123,9 @@ it('Access Patients section from PDA - The patient is hospitalized - add medical
   cy.get(PATIENTS.VACCIN_ICON).should('be.visible').first().click();
   cy.get(PATIENTS.DROPDOWN_PERFORM_PROCEDURE).filter(':visible').first().click();
   cy.get(PATIENTS.DROPDOWN_PERFORM_PROCEDURE_USED_MEDICAL_TOOL, { timeout: 10000 }).scrollIntoView().click();
-  cy.get(PATIENTS.BARCODE_INPUT).should('be.visible').type(this.patient.medicalToolSterile);
+  const barcodeValue = this.patient.medicalToolSterile;
+
+  cy.get(PATIENTS.BARCODE_INPUT).should('be.visible').type(barcodeValue);
   cy.contains(PATIENTS.BUTTON, this.patient.searchButton).should('be.visible').click();
   cy.get('body').should(($body) => {
 
@@ -123,6 +142,7 @@ it('Access Patients section from PDA - The patient is hospitalized - add medical
       } else {
         cy.log('Instrumentul este steril - Continuam procesul de semnare.');
         cy.sign(); 
+        cy.contains('span', `Cod de bare: ${barcodeValue}`, { timeout: 10000 }).should('be.visible');
       }
     });
   });

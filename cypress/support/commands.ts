@@ -32,6 +32,8 @@ import { CLEANING } from "./testids/cleaning";
 // import { HOMEPAGE } from "../support/testids/homepage"
 // import { TRANSACTION } from "../support/testids/transaction"
 
+// ... (importurile tale rămân neschimbate)
+
 Cypress.Commands.add("sign", function () {
   cy.fixture("usersPage").then((users) => {
     cy.fixture("sterilizationPage").then((sterilization) => {
@@ -51,25 +53,42 @@ Cypress.Commands.add("signCycle", function () {
   cy.contains(STERILIZATION.BUTTON, "Caută").should("be.disabled");
   cy.get(USERS.ENTER_NID_INPUT).should("be.visible").type(this.users.barcode).type("{enter}");
   cy.get(USERS.USER_PIN_FIELD).should("be.visible").type(this.users.pin).type("{enter}");
-});
+})
+
+Cypress.Commands.add("selectselectWardHospitalization", function () {
+  cy.contains(STERILIZATION.LABEL, this.sterilization.ward).should("be.visible");
+  cy.get(STERILIZATION.DROPDOWN_SELECT_WARD_HOSPITALIZATION).should("be.visible").click({ force: true });
+  cy.get(STERILIZATION.SELECTED_WARD_HOSPITALIZATION)
+    .should("be.visible")
+    .then(($options) => {
+      const randomIndex = Math.floor(Math.random() * $options.length);
+      const randomOption = $options[randomIndex];
+      const randomTextWard = randomOption.innerText.trim();
+      cy.wrap(randomOption).click({ force: true });
+      cy.wrap(randomTextWard).as("selectedWard");
+      
+      // cy.get("@selectedWard").then((ward) => {
+        // cy.get(STERILIZATION.COMPLETED_WARD_FIELD).should("be.visible").and("contain", ward);
+      // }); // Închide .get("@selectedWard")
+    }); // Închide .then(($options)
+}); // Închide Cypress.Commands.add
 
 Cypress.Commands.add("verifySignName", function (name) {
   cy.contains(STERILIZATION.DIV, "efectuat", { timeout: 10000 })
     .invoke("text")
     .then((fullText) => {
       const normalized = fullText.replace(/\s+/g, " ").trim();
-
       const match = normalized.match(/efectuat[ăa] de\s+([^,]+)/i);
       expect(match, `Text invalid: ${normalized}`).to.not.be.null;
-
       const nameFromText = match[1].trim();
 
-      cy.get<string>("@displayedName").then((displayedName) => {
+      cy.get("@displayedName").then((displayedName) => {
         expect(nameFromText).to.equal(displayedName);
       });
     });
 });
 
+// CORECTAT: Închisă funcția handleCorrectiveAction separat de restul comenzilor
 function handleCorrectiveAction() {
   cy.get(CLEANING.CORRECTIVE_ACTION_FIELD, { timeout: 10000 }).should("be.visible").click({ force: true });
 
@@ -87,20 +106,18 @@ function handleCorrectiveAction() {
         cy.contains(action, { timeout: 10000 }).should("be.visible");
       });
     });
+} // <--- Aici trebuia închisă funcția!
 
-  Cypress.Commands.add("checkAllActivities", () => {
-    cy.get("body").then(($body) => {
-      const checkboxes = $body.find('[type="checkbox"]');
-
-      if (checkboxes.length === 0) {
-        throw new Error("Nu există activități (checkbox-uri) pentru acest tip de curățenie");
+Cypress.Commands.add("checkAllActivities", () => {
+  cy.get("body").then(($body) => {
+    const checkboxes = $body.find('[type="checkbox"]');
+    if (checkboxes.length === 0) {
+      throw new Error("Nu există activități (checkbox-uri) pentru acest tip de curățenie");
+    }
+    cy.wrap(checkboxes).each(($cb) => {
+      if ($cb.attr("aria-checked") !== "true") {
+        cy.wrap($cb).click({ force: true });
       }
-
-      cy.wrap(checkboxes).each(($cb) => {
-        if ($cb.attr("aria-checked") !== "true") {
-          cy.wrap($cb).click({ force: true });
-        }
-      });
     });
   });
-}
+});

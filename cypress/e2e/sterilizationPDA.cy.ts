@@ -9,7 +9,7 @@ beforeEach(function () {
   cy.fixture("patientPage").as("patient");
   cy.fixture("sterilizationPage").as("sterilization");
   cy.fixture("usersPage").as("users");
-  cy.visit("https://qaintegrat-iocn.dev.evozon.com/");
+  cy.visit("https://qaone-iocn.dev.evozon.com/");
   cy.viewport(350, 650);
 
   const username = Cypress.env("username");

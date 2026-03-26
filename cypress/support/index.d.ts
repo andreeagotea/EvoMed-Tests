@@ -11,5 +11,6 @@ declare namespace Cypress {
     verifySignName(name: string): Chainable<void>;
     handleCorrectiveAction(): Chainable<void>;
     checkAllActivities(): Chainable<void>;
+    selectselectWardHospitalization(): Chainable<void>;
   }
 }
